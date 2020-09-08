@@ -1,69 +1,86 @@
-import liveServer, { LiveServerParams } from "live-server";
-import open from "open";
+import liveServer,{ LiveServerParams } from "live-server"
+import open  from "open"
+import './node_modules/live-server/injected.html'
 
-export function entry({ StatusBarItem, Notification, RunningConfig }: any) {
-  let active = false;
+export function entry({ StatusBarItem, Notification, RunningConfig, ContextMenu }: any) {
+  let launchedServers = {}
 
   const config = {
     port: 5520,
+    hint: "List live servers",
+    anyFolderHint: "Open some folder",
     inactive: {
-      text: "Live Server",
-      hint: "Click to run live server",
-      middle: "⚡ Starting",
+      text: "[⚡ Run]",
     },
     active: {
-      text: "Server on Port: 5520",
-      hint: "Click to close server",
-      middle: "🔌 Disposing",
+      text: "[🔌 Dispose]",
     },
   };
+  
+  const anyFolderOpened =  () => RunningConfig.data.workspaceConfig.folders.length > 0
+  
+  const BarItem = new StatusBarItem({
+    label: 'Live Server',
+    hint: config.anyFolderHint,
+    action(e: MouseEvent) {
+     
+      if(!anyFolderOpened()) return
+      
+      new ContextMenu({
+        event: e,
+        parent:e.target,
+        list: RunningConfig.data.workspaceConfig.folders.map(({ name, path }) => {
+          
+          const status = launchedServers[path] ? config.active.text : config.inactive.text
+          
+          return {
+            label: `${status} -> ${name}`,
+            action(){
+              const isRunning = !!launchedServers[path]
 
-  function main(dir: string) {
+              if(isRunning){
+                launchedServers[path].stop()
+                launchedServers[path] = null
+              }else{
+                const serverInstance = runServer(path)
+                launchedServers[path] = serverInstance
+                launchedServers[path].run()
+              }
+            }
+          }
+        })
+      })
+    },
+  });
+  
+  RunningConfig.on('addFolderToRunningWorkspace',() => {
+    BarItem.setHint(config.hint)
+  })
+  
+  function runServer(dir: string) {
     const liveServerParam: LiveServerParams = {
-      port: 5520,
+      port: config.port,
       host: "127.0.0.1",
       open: false,
       wait: 1000,
       logLevel: 0,
       root: dir,
     };
-
-    const run = () => liveServer.start(liveServerParam);
-    const stop = () => liveServer.shutdown();
-
-    const bar = new StatusBarItem({
-      label: active ? config.active.text : config.inactive.text,
-      hint: active ? config.active.hint : config.inactive.hint,
-      action() {
-        bar.setLabel(active ? config.active.middle : config.inactive.middle);
-        setTimeout(() => {
-          active = !active;
-          if (active) {
-            run();
-            open("http://localhost:5520/");
-          } else {
-            stop();
-          }
-          bar.setLabel(active ? config.active.text : config.inactive.text);
-          bar.setHint(active ? config.active.hint : config.inactive.hint);
-        }, 2000);
-      },
-    });
-  }
-
-  RunningConfig.on("addFolderToRunningWorkspace", ({ folderPath }: any) => {
-    try {
-      main(folderPath);
-    } catch (err) {
-      new Notification({
-        title: "Live Server (Error)",
-        lifeTime: 9000,
-        content: err.message,
-      });
+    
+    new Notification({
+      title: 'LiveServer',
+      content: `Serving ${dir} on port ${config.port}`
+    })
+    
+    setTimeout(()=>{
+      open("http://localhost:5520/");
+    },500)
+    
+    return {
+      run : () => liveServer.start(liveServerParam),
+      stop : () => liveServer.shutdown()
     }
-  });
+  }
 }
 
-// module.exports = {
-//   entry,
-// };
+

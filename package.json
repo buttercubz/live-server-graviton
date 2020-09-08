@@ -1,6 +1,6 @@
 {
   "name": "LiveServer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "id": "live-server",
   "mainSrc": "index.ts",
   "mainDev": "dist/index.js",
@@ -12,11 +12,14 @@
     "build": "gvsdk --project . --target plugin --mode release"
   },
   "dependencies": {
+    "emitter": "0.0.5",
+    "http-proxy": "^1.18.1",
     "live-server": "^1.2.1",
-    "open": "^7.2.1"
+    "open": "^7.2.1",
+    "passport": "^0.4.1"
   },
   "devDependencies": {
-    "@gveditor/sdk": "^0.3.9",
+    "@gveditor/sdk": "^0.4.1",
     "@types/live-server": "^1.2.0",
     "@types/node": "^14.6.2",
     "@types/open": "^6.2.1"
