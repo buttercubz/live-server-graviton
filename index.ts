@@ -1,6 +1,7 @@
-import liveServer,{ LiveServerParams } from "live-server"
+import * as http from 'http'
+import finalhandler from 'finalhandler'
+import serveStatic from 'serve-static'
 import open  from "open"
-import './node_modules/live-server/injected.html'
 
 export function entry({ StatusBarItem, Notification, RunningConfig, ContextMenu }: any) {
   let launchedServers = {}
@@ -58,29 +59,26 @@ export function entry({ StatusBarItem, Notification, RunningConfig, ContextMenu 
   })
   
   function runServer(dir: string) {
-    const liveServerParam: LiveServerParams = {
-      port: config.port,
-      host: "127.0.0.1",
-      open: false,
-      wait: 1000,
-      logLevel: 0,
-      root: dir,
-    };
-    
+    const serve = serveStatic(dir);
+
+    const server = http.createServer(function(req, res) {
+      const done = finalhandler(req, res);
+      serve(req, res, done);
+    });
+
+  
     new Notification({
       title: 'LiveServer',
       content: `Serving ${dir} on port ${config.port}`
     })
-    
+
     setTimeout(()=>{
-      open("http://localhost:5520/");
+      open(`http://localhost:${config.port}`);
     },500)
-    
+
     return {
-      run : () => liveServer.start(liveServerParam),
-      stop : () => liveServer.shutdown()
+      run : () =>  server.listen(config.port),
+      stop : () => server.close()
     }
   }
 }
-
-

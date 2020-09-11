@@ -1,10 +1,10 @@
 {
   "name": "LiveServer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "id": "live-server",
   "mainSrc": "index.ts",
   "mainDev": "dist/index.js",
-  "description": "live server graviton",
+  "description": "Live server for Graviton",
   "author": "Buttercubz",
   "main": "index.js",
   "scripts": {
@@ -12,11 +12,9 @@
     "build": "gvsdk --project . --target plugin --mode release"
   },
   "dependencies": {
-    "emitter": "0.0.5",
-    "http-proxy": "^1.18.1",
-    "live-server": "^1.2.1",
+    "finalhandler": "^1.1.2",
     "open": "^7.2.1",
-    "passport": "^0.4.1"
+    "serve-static": "^1.14.1"
   },
   "devDependencies": {
     "@gveditor/sdk": "^0.4.1",
