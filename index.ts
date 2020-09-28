@@ -3,15 +3,31 @@ import serveStatic from "serve-static";
 import open from "open";
 import * as http from "http";
 
+interface config {
+  port: number;
+  hints: {
+    hint: string,
+    anyFolderHint: string
+  };
+  inactive: {
+    text: string;
+  };
+  active: {
+    text: string
+  };
+}
+
 export function entry(
   { StatusBarItem, Notification, RunningConfig, ContextMenu }: any) {
 
   let launchedServers = {};
 
-  const config = {
+  const config: config = {
     port: 5520,
-    hint: "List live servers",
-    anyFolderHint: "Open some folder",
+    hints: {
+      hint: "List live servers",
+      anyFolderHint: "Open some folder"
+    },
     inactive: {
       text: "⚡ Run",
     },
@@ -25,7 +41,7 @@ export function entry(
 
   const BarItem = new StatusBarItem({
     label: "Live Server",
-    hint: config.anyFolderHint,
+    hint: config.hints.anyFolderHint,
     action(e: MouseEvent) {
       if (!anyFolderOpened()) {
         return;
@@ -63,10 +79,10 @@ export function entry(
   });
 
   RunningConfig.on("addFolderToRunningWorkspace", () => {
-    BarItem.setHint(config.hint);
+    BarItem.setHint(config.hints.hint);
   });
 
-  function runServer(dir: string) {
+  function runServer(dir: string): {run: any, stop: any} {
     const serve = serveStatic(dir);
 
     const server = http.createServer(function (req, res) {
