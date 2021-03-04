@@ -1,6 +1,6 @@
 {
   "name": "live-server-graviton",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "id": "live-server",
   "mainSrc": "index.ts",
   "mainDev": "dist/index.js",
